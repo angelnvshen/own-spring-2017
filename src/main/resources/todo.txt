@@ -1,0 +1,1 @@
+1:properties 中获取 项目路径，如果可以，修改h2的 jdbc:url
