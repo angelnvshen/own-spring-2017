@@ -16,4 +16,9 @@ public class TestController {
     public String test(){
         return "success";
     }
+
+    @RequestMapping("/zeroException")
+    public int zeroException(){
+        return 100/0;
+    }
 }
