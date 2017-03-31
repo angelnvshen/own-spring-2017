@@ -14,6 +14,8 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.ui.velocity.VelocityEngineFactoryBean;
 import org.springframework.ui.velocity.VelocityEngineUtils;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -32,6 +34,9 @@ public class MailTest {
 
     @Autowired
     private VelocityEngine velocityEngine;
+
+    @Autowired
+    private TemplateEngine templateEngine;
 
     private static String from = "angelnvshen@163.com";
     private static String to = "646099684@qq.com";
@@ -100,6 +105,32 @@ public class MailTest {
         Map<String, Object> model = new HashMap<>();
         model.put("name", "MZULE");
         String emailText = VelocityEngineUtils.mergeTemplateIntoString(velocityEngine, "emailTemplate.vm", model);
+        helper.setText(emailText, true);
+
+        ClassPathResource image = new ClassPathResource("image.jpg");
+
+        //addInline的第一个参数表明内联图片的标识符——与<img>标签的src属性所指定的相同。第二个参数是图片的资源引用
+        helper.addInline("logo", image);
+        mailSenderImpl.send(message);
+
+    }
+
+    @Test
+    public void testsendRichEmailWithThymeleafTemplate() throws MessagingException {
+        JavaMailSenderImpl mailSenderImpl = (JavaMailSenderImpl)mailSender;
+        MimeMessage message = mailSenderImpl.createMimeMessage();
+        //在这里是个布尔值true，表明这个消息是multipart类型的
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        helper.setFrom(from);
+        helper.setTo(to);
+
+        //主题
+        helper.setSubject("hello world");
+
+        Context ctx = new Context();
+        ctx.setVariable("name", "MZULE");
+
+        String emailText = templateEngine.process("emailTemplate.html", ctx);
         helper.setText(emailText, true);
 
         ClassPathResource image = new ClassPathResource("image.jpg");
